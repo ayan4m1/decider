@@ -14,8 +14,8 @@ const pkg = JSON.parse(
 ) as { description: string; version: string };
 
 const {
-  input: statePath,
-  questions: questionPath,
+  input: inputPath,
+  questions: questionsPath,
   output: outputPath
 } = program
   .name('decider')
@@ -40,8 +40,8 @@ const {
   .opts();
 
 try {
-  const states = await loadStates(statePath);
-  const questions = await loadQuestions(questionPath);
+  const states = await loadStates(inputPath);
+  const questions = await loadQuestions(questionsPath);
 
   if (existsSync(outputPath)) {
     log.warning(`${outputPath} already exists, not overwriting it...`);
