@@ -1,0 +1,25 @@
+{
+  "coherent": {
+    "type": "score",
+    "instructions": "How coherent is the document?",
+    "criteria": [
+      "completely incoherent",
+      "mostly incoherent",
+      "mostly coherent",
+      "completely coherent"
+    ]
+  },
+  "size": {
+    "type": "choice",
+    "instructions": "How long is the document?",
+    "criteria": {
+      "tiny": "A few sentences",
+      "small": "At least one full paragraph",
+      "long": "At least three paragraphs"
+    }
+  },
+  "useful": {
+    "type": "noul",
+    "instructions": "Is the document useful?"
+  }
+}

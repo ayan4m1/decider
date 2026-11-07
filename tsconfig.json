@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "declaration": true,
+    "erasableSyntaxOnly": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "rewriteRelativeImportExtensions": true,
+    "target": "esnext",
+    "types": ["node"],
+    "verbatimModuleSyntax": true,
+    "rootDir": "./",
+    "outDir": "./lib"
+  },
+  "include": ["src/**/*.ts"]
+}
