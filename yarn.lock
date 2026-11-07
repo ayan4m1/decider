@@ -9,6 +9,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ayan4m1/decider@workspace:."
   dependencies:
+    "@commander-js/extra-typings": "npm:^15.0.0"
     "@commitlint/config-conventional": "npm:^21.2.4"
     "@commitlint/cz-commitlint": "npm:^21.2.4"
     "@eslint/js": "npm:9.39.5"
@@ -68,6 +69,15 @@ __metadata:
   version: 1.6.1
   resolution: "@colors/colors@npm:1.6.1"
   checksum: 10c0/8fb995f2421210284305fd07b4b70e9873a417cda8b0d66ba3f7beccd2e0f4ebbe0b2ba3afbef8f07740ad707c379d94e836cffd6a8df394387e210b4338b4c9
+  languageName: node
+  linkType: hard
+
+"@commander-js/extra-typings@npm:^15.0.0":
+  version: 15.0.0
+  resolution: "@commander-js/extra-typings@npm:15.0.0"
+  peerDependencies:
+    commander: ~15.0.0
+  checksum: 10c0/4282857c0acb2da1b893fe8c39a939bdfae2d7cbb43a22c1fe8ef5bef4cf615ddb34d96239f7603294ef5014728799c8212f4451fa9d2e469cce087eb89f0218
   languageName: node
   linkType: hard
 

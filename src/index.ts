@@ -1,10 +1,10 @@
 import { existsSync } from 'node:fs';
 import { appendFile, readFile } from 'node:fs/promises';
-import { program } from 'commander';
+import { program } from '@commander-js/extra-typings';
 
 import { getLogger } from './logging.ts';
 import { decide } from './ollama.ts';
-import type { DeciderRequest, ProgramOpts } from './types.ts';
+import type { DeciderRequest } from './types.ts';
 import { loadQuestions, loadStates } from './utils.ts';
 
 const log = getLogger('index');
@@ -13,7 +13,11 @@ const pkg = JSON.parse(
   await readFile(new URL('../package.json', import.meta.url), 'utf8')
 ) as { description: string; version: string };
 
-program
+const {
+  input: statePath,
+  questions: questionPath,
+  output: outputPath
+} = program
   .name('decider')
   .description(pkg.description)
   .version(pkg.version)
@@ -32,13 +36,8 @@ program
     'JSONL file to write results to',
     './scored.jsonl'
   )
-  .parse();
-
-const {
-  input: statePath,
-  questions: questionPath,
-  output: outputPath
-} = program.opts<ProgramOpts>();
+  .parse()
+  .opts();
 
 try {
   const states = await loadStates(statePath);
