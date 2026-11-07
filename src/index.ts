@@ -1,18 +1,46 @@
 import { existsSync } from 'node:fs';
-import { appendFile } from 'node:fs/promises';
+import { appendFile, readFile } from 'node:fs/promises';
+import { program } from 'commander';
 
 import { getLogger } from './logging.ts';
 import { decide } from './ollama.ts';
-import type { DeciderRequest } from './types.ts';
+import type { DeciderRequest, ProgramOpts } from './types.ts';
 import { loadQuestions, loadStates } from './utils.ts';
 
 const log = getLogger('index');
 
-try {
-  const statePath = './states.jsonl';
-  const questionPath = './questions.json';
-  const outputPath = './scored.jsonl';
+const pkg = JSON.parse(
+  await readFile(new URL('../package.json', import.meta.url), 'utf8')
+) as { description: string; version: string };
 
+program
+  .name('decider')
+  .description(pkg.description)
+  .version(pkg.version)
+  .option(
+    '-i, --input <path>',
+    'JSONL file of states to evaluate',
+    './states.jsonl'
+  )
+  .option(
+    '-q, --questions <path>',
+    'JSON file of questions to ask',
+    './questions.json'
+  )
+  .option(
+    '-o, --output <path>',
+    'JSONL file to write results to',
+    './scored.jsonl'
+  )
+  .parse();
+
+const {
+  input: statePath,
+  questions: questionPath,
+  output: outputPath
+} = program.opts<ProgramOpts>();
+
+try {
   const states = await loadStates(statePath);
   const questions = await loadQuestions(questionPath);
 

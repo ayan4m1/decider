@@ -18,3 +18,9 @@ export type AppConfig = {
 export type DeciderRequest = Pick<SystemOneRequest, 'questions' | 'state'>;
 
 export type DeciderQuestions = Record<string, SystemOneQuestion>;
+
+export type ProgramOpts = {
+  input: string;
+  output: string;
+  questions: string;
+};
