@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { appendFile, readFile } from 'node:fs/promises';
+import { appendFile, readFile, unlink } from 'node:fs/promises';
 import { program } from '@commander-js/extra-typings';
 
 import { getLogger } from './logging.ts';
@@ -47,6 +47,9 @@ program
         if (existsSync(outputPath) && !force) {
           log.warning(`${outputPath} already exists, not overwriting it...`);
           process.exit(1);
+        } else if (force) {
+          log.warning(`${outputPath} already exists, overwriting it...`);
+          await unlink(outputPath);
         }
 
         for (let i = 0; i < states.length; i++) {
