@@ -15,7 +15,7 @@ npm run build
 cp .env.default .env
 ```
 
-Configure `.env` for your desired Ollama instance and model.
+Configure `.env` for your desired Ollama instance and model. Set `DECIDER_CONCURRENCY` (default `1`) to send that many requests to the model at once.
 
 Your data should be in a JSONL file (default `states.jsonl`), where each line is a JSON string or object representing the state to be passed to the decision model.
 
@@ -30,7 +30,3 @@ Run `node lib/index.js` to start processing. Results will be written to a JSONL 
 | `-i, --input <path>`     | JSONL file of states to evaluate | `./states.jsonl`   |
 | `-q, --questions <path>` | JSON file of questions to ask    | `./questions.json` |
 | `-o, --output <path>`    | JSONL file to write results to   | `./scored.jsonl`   |
-
-## Roadmap
-
-- Optional batch processing

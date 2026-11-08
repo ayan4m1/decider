@@ -1,7 +1,9 @@
 import { existsSync } from 'node:fs';
 import { appendFile, readFile, unlink } from 'node:fs/promises';
 import { program } from '@commander-js/extra-typings';
+import chunk from 'lodash/chunk.js';
 
+import config from './config.ts';
 import { getLogger } from './logging.ts';
 import { decide } from './ollama.ts';
 import type { DeciderRequest } from './types.ts';
@@ -52,40 +54,51 @@ program
           await unlink(outputPath);
         }
 
-        for (let i = 0; i < states.length; i++) {
-          const state = states[i];
-          const request: DeciderRequest = { state, questions };
-          const response = await decide(request);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const answers: any = {};
+        const batches = chunk(states, config.concurrency);
+        let processed = 0;
 
-          for (const [key] of Object.entries(questions)) {
-            const answer = response.answers[key];
+        for (const batch of batches) {
+          const requests: DeciderRequest[] = batch.map((state) => ({
+            state,
+            questions
+          }));
+          const responses = await decide(requests);
 
-            if (!answer) {
-              continue;
+          for (let j = 0; j < batch.length; j++) {
+            const state = batch[j];
+            const response = responses[j];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const answers: any = {};
+
+            for (const [key] of Object.entries(questions)) {
+              const answer = response.answers[key];
+
+              if (!answer) {
+                continue;
+              }
+
+              answers[key] = answer;
             }
 
-            answers[key] = answer;
+            processed++;
+            log.info(
+              `${processed} / ${states.length} (${((processed / states.length) * 1e2).toFixed(2)}%)`
+            );
+            log.debug(
+              `State:\n\n${typeof state === 'string' ? state : JSON.stringify(state, null, 2)}\n\n`
+            );
+            log.debug(`Answers:\n\n${JSON.stringify(answers, null, 2)}\n\n`);
+
+            await appendFile(
+              outputPath,
+              `${JSON.stringify({
+                answers,
+                questions,
+                state
+              })}\n`,
+              'utf8'
+            );
           }
-
-          log.info(
-            `${i} / ${states.length} (${((i / states.length) * 1e2).toFixed(2)}%)`
-          );
-          log.debug(
-            `State:\n\n${typeof state === 'string' ? state : JSON.stringify(state, null, 2)}\n\n`
-          );
-          log.debug(`Answers:\n\n${JSON.stringify(answers, null, 2)}\n\n`);
-
-          appendFile(
-            outputPath,
-            `${JSON.stringify({
-              answers,
-              questions,
-              state
-            })}\n`,
-            'utf8'
-          );
         }
       } catch (error) {
         if (error instanceof Error) {

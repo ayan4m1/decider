@@ -7,6 +7,10 @@ try {
 }
 
 const config: AppConfig = {
+  concurrency: Math.max(
+    1,
+    parseInt(process.env.DECIDER_CONCURRENCY ?? '', 10) || 1
+  ),
   log: {
     level: process.env.DECIDER_LOG_LEVEL || 'info'
   },

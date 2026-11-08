@@ -14,9 +14,13 @@ const client = new Ollama({
   host: ollama.baseUrl
 });
 
-export const decide = (req: DeciderRequest) =>
-  client.systemone({
-    model: ollama.model,
-    questions: req.questions,
-    state: req.state
-  });
+export const decide = (reqs: DeciderRequest[]) =>
+  Promise.all(
+    reqs.map((req) =>
+      client.systemone({
+        model: ollama.model,
+        questions: req.questions,
+        state: req.state
+      })
+    )
+  );

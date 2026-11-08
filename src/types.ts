@@ -11,6 +11,7 @@ export type OllamaConfig = {
 };
 
 export type AppConfig = {
+  concurrency: number;
   log: LogConfig;
   ollama: OllamaConfig;
 };
