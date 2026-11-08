@@ -37,13 +37,14 @@ program
     async ({
       input: inputPath,
       questions: questionsPath,
-      output: outputPath
+      output: outputPath,
+      force
     }) => {
       try {
         const states = await loadStates(inputPath);
         const questions = await loadQuestions(questionsPath);
 
-        if (existsSync(outputPath)) {
+        if (existsSync(outputPath) && !force) {
           log.warning(`${outputPath} already exists, not overwriting it...`);
           process.exit(1);
         }
