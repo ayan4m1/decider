@@ -3,7 +3,7 @@ import { type SystemOneContent } from 'ollama';
 import { createReadStream, existsSync } from 'node:fs';
 import { createInterface } from 'node:readline/promises';
 
-import type { DeciderQuestions } from './types';
+import type { DeciderQuestions, InputFormats } from './types';
 
 async function loadJsonl<T>(filePath: string) {
   const rl = createInterface({
@@ -24,12 +24,18 @@ async function loadJsonl<T>(filePath: string) {
   return results;
 }
 
-export const loadStates = (path: string) => {
+export const loadStates = async (path: string, inputFormat: InputFormats) => {
   if (!existsSync(path)) {
     throw new Error(`No data at location ${path}!`);
   }
 
-  return loadJsonl<SystemOneContent>(path);
+  if (inputFormat === 'jsonl') {
+    return loadJsonl<SystemOneContent>(path);
+  }
+
+  return JSON.parse(
+    await readFile(path, 'utf8')
+  ) as unknown as SystemOneContent[];
 };
 
 export const loadQuestions = async (path: string) => {

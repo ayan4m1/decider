@@ -1,12 +1,16 @@
 import { existsSync } from 'node:fs';
-import { appendFile, readFile, unlink } from 'node:fs/promises';
+import { appendFile, readFile, unlink, writeFile } from 'node:fs/promises';
 import { program } from '@commander-js/extra-typings';
 import chunk from 'lodash/chunk.js';
 
 import config from './config.ts';
 import { getLogger } from './logging.ts';
 import { decide } from './ollama.ts';
-import type { DeciderRequest } from './types.ts';
+import {
+  InputFormats,
+  type DeciderRequest,
+  type DeciderResult
+} from './types.ts';
 import { loadQuestions, loadStates } from './utils.ts';
 
 const log = getLogger('index');
@@ -34,27 +38,48 @@ program
     'JSONL file to write results to',
     './scored.jsonl'
   )
-  .option('-f, --force', 'Force overwrite the output file if it exists', false)
+  .option('-f, --force', 'Force overwrite the output file if it exists')
+  .option(
+    '--input-format <format>',
+    'Input format (either jsonl or json_array)',
+    'jsonl'
+  )
+  .option(
+    '--output-format <format>',
+    'Output format (either jsonl or json_array)',
+    'jsonl'
+  )
   .action(
     async ({
       input: inputPath,
+      inputFormat,
       questions: questionsPath,
       output: outputPath,
+      outputFormat,
       force
     }) => {
       try {
-        const states = await loadStates(inputPath);
+        if (inputPath === './states.jsonl' && inputFormat === 'json_array') {
+          inputPath = './states.json';
+        }
+
+        if (outputPath === './scored.jsonl' && outputFormat === 'json_array') {
+          outputPath = './scored.json';
+        }
+
+        const states = await loadStates(inputPath, inputFormat as InputFormats);
         const questions = await loadQuestions(questionsPath);
 
         if (existsSync(outputPath) && !force) {
-          log.warning(`${outputPath} already exists, not overwriting it...`);
+          log.warn(`${outputPath} already exists, not overwriting it...`);
           process.exit(1);
         } else if (force) {
-          log.warning(`${outputPath} already exists, overwriting it...`);
+          log.warn(`${outputPath} already exists, overwriting it...`);
           await unlink(outputPath);
         }
 
         const batches = chunk(states, config.concurrency);
+        const results: DeciderResult[] = [];
         let processed = 0;
 
         for (const batch of batches) {
@@ -89,16 +114,26 @@ program
             );
             log.debug(`Answers:\n\n${JSON.stringify(answers, null, 2)}\n\n`);
 
-            await appendFile(
-              outputPath,
-              `${JSON.stringify({
-                answers,
-                questions,
-                state
-              })}\n`,
-              'utf8'
-            );
+            const result: DeciderResult = {
+              answers,
+              questions,
+              state
+            };
+
+            if (outputFormat === 'jsonl') {
+              await appendFile(
+                outputPath,
+                `${JSON.stringify(result)}\n`,
+                'utf8'
+              );
+            } else {
+              results.push(result);
+            }
           }
+        }
+
+        if (outputFormat === 'json_array') {
+          await writeFile(outputPath, JSON.stringify(results), 'utf8');
         }
       } catch (error) {
         if (error instanceof Error) {
