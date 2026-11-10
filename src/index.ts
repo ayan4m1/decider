@@ -73,7 +73,7 @@ program
         if (existsSync(outputPath) && !force) {
           log.warn(`${outputPath} already exists, not overwriting it...`);
           process.exit(1);
-        } else if (force) {
+        } else if (existsSync(outputPath)) {
           log.warn(`${outputPath} already exists, overwriting it...`);
           await unlink(outputPath);
         }
